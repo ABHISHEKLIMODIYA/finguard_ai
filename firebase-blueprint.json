@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user information and roles.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "description": "User email" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "role": { "type": "string", "enum": ["admin", "auditor", "user"], "description": "User role" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Transaction": {
+      "title": "Financial Transaction",
+      "description": "Stores financial transaction data for analysis.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Transaction ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "amount": { "type": "number", "description": "Transaction amount" },
+        "currency": { "type": "string", "description": "Currency code" },
+        "counterparty": { "type": "string", "description": "Transaction counterparty" },
+        "category": { "type": "string", "description": "Transaction category" },
+        "status": { "type": "string", "enum": ["pending", "completed", "flagged"], "description": "Transaction status" },
+        "complianceScore": { "type": "number", "description": "Risk/Compliance score (0-100)" },
+        "complianceStatus": { "type": "string", "enum": ["safe", "warning", "violation"], "description": "Compliance status" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Transaction time" }
+      },
+      "required": ["userId", "amount", "currency", "timestamp"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "Logs agent actions and reasoning steps.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Log ID" },
+        "userId": { "type": "string", "description": "User who triggered the action" },
+        "action": { "type": "string", "description": "Action performed (e.g., Analysis, Report Generation)" },
+        "input": { "type": "string", "description": "User input or trigger" },
+        "reasoning": { "type": "string", "description": "AI agent reasoning steps" },
+        "rulesTriggered": { "type": "array", "items": { "type": "string" }, "description": "Compliance rules triggered" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Log time" }
+      },
+      "required": ["userId", "action", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "UserProfile",
+      "description": "User profile documents."
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Financial transaction records."
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Audit trail logs."
+    }
+  }
+}

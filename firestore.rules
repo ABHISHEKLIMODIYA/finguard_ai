@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "abhisheklimodiya01@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isAuditor() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'auditor';
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidUser(data) {
+      return data.uid is string && data.uid.size() > 0 &&
+             data.email is string && data.email.size() > 0 &&
+             data.role in ['admin', 'auditor', 'user'];
+    }
+
+    function isValidTransaction(data) {
+      return data.userId is string && data.userId.size() > 0 &&
+             data.amount is number &&
+             data.currency is string && data.currency.size() == 3 &&
+             data.status in ['pending', 'completed', 'flagged'];
+    }
+
+    function isValidAuditLog(data) {
+      return data.userId is string && data.userId.size() > 0 &&
+             data.action is string && data.action.size() > 0;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin() || isAuditor();
+      allow create: if isOwner(uid) && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
+      allow update: if (isOwner(uid) && isValidUser(request.resource.data) && request.resource.data.role == resource.data.role) || isAdmin();
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin() || isAuditor();
+      allow create: if isOwner(request.resource.data.userId) && isValidTransaction(request.resource.data);
+      allow update: if (isOwner(resource.data.userId) && isValidTransaction(request.resource.data) && request.resource.data.userId == resource.data.userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /audit_logs/{logId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin() || isAuditor();
+      allow create: if isAuthenticated() && isValidAuditLog(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+  }
+}

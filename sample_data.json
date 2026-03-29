@@ -1,0 +1,30 @@
+[
+  {
+    "amount": 50000,
+    "counterparty": "Reliance Industries",
+    "category": "Business",
+    "currency": "INR",
+    "timestamp": "2026-03-28T10:00:00Z"
+  },
+  {
+    "amount": 1200000,
+    "counterparty": "Shell Corp",
+    "category": "Investment",
+    "currency": "INR",
+    "timestamp": "2026-03-28T11:30:00Z"
+  },
+  {
+    "amount": 75000,
+    "counterparty": "Personal Transfer",
+    "category": "Personal",
+    "currency": "INR",
+    "timestamp": "2026-03-28T14:15:00Z"
+  },
+  {
+    "amount": 250000,
+    "counterparty": "HDFC Bank",
+    "category": "Operational",
+    "currency": "INR",
+    "timestamp": "2026-03-29T09:00:00Z"
+  }
+]
